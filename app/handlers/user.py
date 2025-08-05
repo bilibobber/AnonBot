@@ -1,30 +1,35 @@
 from aiogram import Router
 from aiogram.types import Message
-from aiogram.filters import CommandStart, Command
+from aiogram.filters import Command
 
+from core.database.queries import update_correspondence
 from core.bot.__init__ import bot
 
 user_router = Router()
 
-
-@user_router.message(CommandStart())
-async def handle_start(message: Message):
-    await message.reply('')
+IS_ADMIN = False
 
 
 @user_router.message(Command('msg'))
 async def handle_msg(message: Message):
-    user_message = f'<b>{message.from_user.id} @{message.from_user.username}:</b>\n {message.text.removeprefix('/msg ')}'
+    msg = message.text
+    try:
+        msg_parts = msg.split(' ')
+        msg = ' '.join(msg_parts[1:])
+        if not msg:
+            raise Exception()
+
+    except Exception:
+        await message.reply('<b>Ошибка.</b>\nСообщение должно быть вида\n/msg &lt;message&gt.')
+        return
+    msg = f'<b>{message.from_user.id} @{message.from_user.username}:</b>\n{msg}'
     admin_ids = [1689195799]
     try:
         for admin_id in admin_ids:
-            await bot.send_message(text=user_message,
+            await bot.send_message(text=msg,
                                    chat_id=admin_id)
     except Exception as e:
         print(f'Error: {e}')
         await message.reply('Sorry, you message was not sent.')
 
-
-@user_router.message(Command('id'))
-async def handle_id(message: Message):
-    await message.reply(str(message.from_user.id))
+    update_correspondence(message.from_user.id, msg, str(message.date), IS_ADMIN, '@' + str(message.from_user.username))

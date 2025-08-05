@@ -5,6 +5,7 @@ from . import dp, bot
 
 from app.handlers.user import user_router
 from app.handlers.admin import admin_router
+from app.handlers.basic import basic_router
 
 
 async def start_polling() -> None:
@@ -13,6 +14,7 @@ async def start_polling() -> None:
     try:
         dp.include_router(user_router)
         dp.include_router(admin_router)
+        dp.include_router(basic_router)
 
         await dp.start_polling(bot)
     except KeyboardInterrupt:
