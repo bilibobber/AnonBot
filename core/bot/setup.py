@@ -3,9 +3,10 @@ import sys
 
 from . import dp, bot
 
-from app.handlers.user import user_router
-from app.handlers.admin import admin_router
-from app.handlers.basic import basic_router
+from app.handlers.commands.user import user_router
+from app.handlers.commands.admin import admin_router
+from app.handlers.commands.basic import basic_router
+from app.handlers.callbacks.pagination import callbacks_router
 
 
 async def start_polling() -> None:
@@ -15,6 +16,7 @@ async def start_polling() -> None:
         dp.include_router(user_router)
         dp.include_router(admin_router)
         dp.include_router(basic_router)
+        dp.include_router(callbacks_router)
 
         await dp.start_polling(bot)
     except KeyboardInterrupt:

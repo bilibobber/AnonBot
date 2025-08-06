@@ -1,6 +1,8 @@
+import os
+from functools import lru_cache
+
 from .__init__ import Database
 
-import os
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -118,7 +120,49 @@ RETURNING correspondence;
 
         try:
             cursor.execute(query, params)
+            get_names.cache_clear()
             print('[DB.INFO] Successfully correspondence update.') if os.getenv('DEBUG') else None
         except Exception as e:
             print(f'[DB.ERROR] Query error, {e}')
 
+
+def add_admin(user_id: int, username: str, is_admin: bool = True) -> None:
+    with db.get_connection() as conn:
+        cursor = conn.cursor()
+        if is_admin:
+            cursor.execute('INSERT INTO admins (user_id, user_name) VALUES (%s, %s)', (user_id, username))
+        else:
+            print(f'[DB.ERROR] User {username}, {user_id} is not admin.')
+
+
+def get_admins() -> list:
+    with db.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM admins')
+
+        return cursor.fetchall()
+
+
+@lru_cache(maxsize=None)
+def get_names() -> list:
+    with db.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT user_id, user_name FROM correspondence")
+
+        return cursor.fetchall()
+
+
+def get_count() -> int:
+    with db.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM correspondence")
+
+        return int(cursor.fetchone()[0])
+
+
+def get_correspondence(with_date: bool = False) -> tuple:
+    with db.get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT correspondence.correspondence FROM correspondence')
+
+        return cursor.fetchall()

@@ -52,3 +52,4 @@ htmlcov/
 
 # Local development
 local_settings.py
+test.py
