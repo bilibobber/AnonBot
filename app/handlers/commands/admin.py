@@ -41,4 +41,4 @@ async def handle_msg(message: Message):
         print(f'Error: {e}')
         await message.reply('<b>Ошибка.</b>\nНе получилось отправить сообщение.')
 
-    update_correspondence(user_identifier, msg, str(message.date), IS_ADMIN)
+    update_correspondence(user_identifier, msg, str(message.date.astimezone()), IS_ADMIN)

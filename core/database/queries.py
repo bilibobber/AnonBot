@@ -160,9 +160,17 @@ def get_count() -> int:
         return int(cursor.fetchone()[0])
 
 
-def get_correspondence(with_date: bool = False) -> tuple:
+def get_correspondence(user_id: int, quantity: int or str = 30):
     with db.get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute('SELECT correspondence.correspondence FROM correspondence')
+        cursor.execute('SELECT correspondence.correspondence FROM correspondence WHERE user_id=%s', (user_id,))
 
-        return cursor.fetchall()
+        json = cursor.fetchall()[0][0]
+        if quantity == 'all':
+            quantity = json['meta']['count']
+        else:
+            quantity = json['meta']['count'] if json['meta']['count'] < quantity else quantity
+
+    for message in json['messages'][json['meta']['count']-quantity:]:
+        is_admin = True if message['is_admin'] == 'true' else False
+        yield message['text'], message['date'], is_admin
